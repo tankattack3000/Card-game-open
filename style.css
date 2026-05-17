@@ -1,0 +1,142 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-area {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.deck {
+    flex-shrink: 0;
+    width: 120px;
+    height: 160px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid #ddd;
+}
+
+.deck:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+}
+
+.deck:active {
+    transform: scale(0.98);
+}
+
+.card-placeholder {
+    color: #999;
+    font-size: 0.9em;
+    text-align: center;
+    padding: 10px;
+}
+
+.play-area {
+    flex: 1;
+    min-height: 600px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    position: relative;
+    padding: 20px;
+}
+
+.card {
+    position: absolute;
+    width: 100px;
+    height: 140px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    touch-action: none;
+    user-select: none;
+}
+
+.card:active {
+    cursor: grabbing;
+    z-index: 1000;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+.card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Responsiv design för mobil */
+@media (max-width: 768px) {
+    .game-area {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .play-area {
+        min-height: 400px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .card {
+        width: 80px;
+        height: 110px;
+    }
+}
+
+@media (max-width: 480px) {
+    .deck {
+        width: 100px;
+        height: 140px;
+    }
+
+    .card {
+        width: 70px;
+        height: 100px;
+    }
+
+    .play-area {
+        min-height: 300px;
+    }
+}
