@@ -84,7 +84,7 @@ function createCardElement(cardNumber, deck) {
     card.addEventListener('mousedown', startDrag);
     
     // Touch drag & drop
-    card.addEventListener('touchstart', startTouchDrag);
+    card.addEventListener('touchstart', startTouchDrag, false);
     
     return card;
 }
@@ -102,6 +102,8 @@ function startDrag(e) {
     
     document.addEventListener('mousemove', moveDrag);
     document.addEventListener('mouseup', endDrag);
+    
+    e.preventDefault();
 }
 
 // Desktop drag - move
@@ -136,8 +138,10 @@ function startTouchDrag(e) {
     offset.x = e.touches[0].clientX - rect.left;
     offset.y = e.touches[0].clientY - rect.top;
     
-    document.addEventListener('touchmove', moveTouchDrag);
+    document.addEventListener('touchmove', moveTouchDrag, false);
     document.addEventListener('touchend', endTouchDrag);
+    
+    e.preventDefault();
 }
 
 // Touch drag - move
@@ -154,6 +158,8 @@ function moveTouchDrag(e) {
     
     draggedCard.style.left = x + 'px';
     draggedCard.style.top = y + 'px';
+    
+    e.preventDefault();
 }
 
 // Touch drag - end
