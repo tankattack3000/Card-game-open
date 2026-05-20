@@ -2,53 +2,81 @@ const NUM_CARDS = 5;
 const CARD_WIDTH = 100;
 const CARD_HEIGHT = 140;
 
-let cards = [];
-let shuffledDeck = [];
+let cards1 = [];
+let cards2 = [];
+let shuffledDeck1 = [];
+let shuffledDeck2 = [];
 let draggedCard = null;
 let offset = { x: 0, y: 0 };
 
-const deck = document.getElementById('deck');
+const deck1 = document.getElementById('deck1');
+const deck2 = document.getElementById('deck2');
 const playArea = document.getElementById('playArea');
 
-// Initialisera korten
+// Initialisera korten för båda lekarna
 function initCards() {
     for (let i = 1; i <= NUM_CARDS; i++) {
-        cards.push(i);
+        cards1.push(i);
+        cards2.push(i);
     }
-    shuffleDeck();
+    shuffleDeck1Func();
+    shuffleDeck2Func();
 }
 
-// Blanda korten
-function shuffleDeck() {
-    shuffledDeck = [...cards].sort(() => Math.random() - 0.5);
+// Blanda lek 1
+function shuffleDeck1Func() {
+    shuffledDeck1 = [...cards1].sort(() => Math.random() - 0.5);
 }
 
-// Dra ett kort från högen
-function drawCard() {
-    if (shuffledDeck.length === 0) {
-        shuffleDeck();
+// Blanda lek 2
+function shuffleDeck2Func() {
+    shuffledDeck2 = [...cards2].sort(() => Math.random() - 0.5);
+}
+
+// Dra ett kort från lek 1
+function drawCard1() {
+    if (shuffledDeck1.length === 0) {
+        shuffleDeck1Func();
     }
     
-    const cardNumber = shuffledDeck.pop();
-    const cardElement = createCardElement(cardNumber);
+    const cardNumber = shuffledDeck1.pop();
+    const cardElement = createCardElement(cardNumber, 'card1');
     playArea.appendChild(cardElement);
     
     // Slumpmässig position nära högen
-    const x = Math.random() * 200 + 150;
+    const x = Math.random() * 200 + 50;
+    const y = Math.random() * 200;
+    cardElement.style.left = x + 'px';
+    cardElement.style.top = y + 'px';
+}
+
+// Dra ett kort från lek 2
+function drawCard2() {
+    if (shuffledDeck2.length === 0) {
+        shuffleDeck2Func();
+    }
+    
+    const cardNumber = shuffledDeck2.pop();
+    const cardElement = createCardElement(cardNumber, 'card2');
+    playArea.appendChild(cardElement);
+    
+    // Slumpmässig position nära högen
+    const x = Math.random() * 200 + (playArea.offsetWidth - 200 - 150);
     const y = Math.random() * 200;
     cardElement.style.left = x + 'px';
     cardElement.style.top = y + 'px';
 }
 
 // Skapa kort-element
-function createCardElement(cardNumber) {
+function createCardElement(cardNumber, deck) {
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.card = cardNumber;
+    card.dataset.deck = deck;
     
     const img = document.createElement('img');
-    img.src = `card1/card${cardNumber}.png`;
-    img.alt = `Card ${cardNumber}`;
+    img.src = `${deck}/card${cardNumber}.png`;
+    img.alt = `${deck} Card ${cardNumber}`;
     
     card.appendChild(img);
     
@@ -136,7 +164,8 @@ function endTouchDrag() {
 }
 
 // Event listeners
-deck.addEventListener('click', drawCard);
+deck1.addEventListener('click', drawCard1);
+deck2.addEventListener('click', drawCard2);
 
 // Starta spelet
 initCards();
