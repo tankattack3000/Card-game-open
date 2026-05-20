@@ -16,7 +16,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
 }
 
 h1 {
@@ -27,14 +27,28 @@ h1 {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+h2 {
+    text-align: center;
+    color: white;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 .game-area {
     display: flex;
-    gap: 30px;
+    gap: 20px;
     margin-bottom: 20px;
 }
 
-.deck {
+.deck-container {
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.deck {
     width: 120px;
     height: 160px;
     background: white;
@@ -105,9 +119,15 @@ h1 {
 }
 
 /* Responsiv design för mobil */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .game-area {
         flex-direction: column;
+        gap: 20px;
+    }
+
+    .deck-container {
+        flex-direction: row;
+        justify-content: center;
         gap: 20px;
     }
 
@@ -126,6 +146,10 @@ h1 {
 }
 
 @media (max-width: 480px) {
+    .deck-container {
+        flex-direction: column;
+    }
+
     .deck {
         width: 100px;
         height: 140px;
