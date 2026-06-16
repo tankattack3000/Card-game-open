@@ -119,26 +119,7 @@ function createCardElement(cardNumber, deck) {
     // Touch drag & drop
     card.addEventListener('touchstart', startTouchDrag, false);
     
-    // Dubbelklick för att lägga till i discard
-    card.addEventListener('dblclick', () => addToDiscard(card));
-    
     return card;
-}
-
-// Lägg kort i discardhögen
-function addToDiscard(cardElement) {
-    const deck = cardElement.dataset.deck;
-    const cardNum = parseInt(cardElement.dataset.card);
-    
-    if (deck === 'card1') {
-        discardPile1.push(cardNum);
-        updateDiscardDisplay(discard1, 'card1');
-    } else if (deck === 'card2') {
-        discardPile2.push(cardNum);
-        updateDiscardDisplay(discard2, 'card2');
-    }
-    
-    cardElement.remove();
 }
 
 // Uppdatera discardhögen visuellt
@@ -170,6 +151,12 @@ function clearDiscardDisplay(discardElement) {
     }
 }
 
+// Kontrollera om punkt är inom discard-högen
+function isOverDiscardPile(x, y, discardElement) {
+    const rect = discardElement.getBoundingClientRect();
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
 // Desktop drag - start
 function startDrag(e) {
     if (e.button !== 0) return; // Only left mouse button
@@ -183,6 +170,9 @@ function startDrag(e) {
     
     offset.x = e.clientX - rect.left;
     offset.y = e.clientY - rect.top;
+    
+    draggedCard.style.opacity = '0.8';
+    draggedCard.style.zIndex = '1001';
     
     document.addEventListener('mousemove', moveDrag);
     document.addEventListener('mouseup', endDrag);
@@ -198,17 +188,52 @@ function moveDrag(e) {
     let x = e.clientX - playAreaRect.left - offset.x;
     let y = e.clientY - playAreaRect.top - offset.y;
     
-    // Begränsa inom play area
-    x = Math.max(0, Math.min(x, playAreaRect.width - CARD_WIDTH));
-    y = Math.max(0, Math.min(y, playAreaRect.height - CARD_HEIGHT));
-    
+    // Tillåt att kortet dras utanför play area för discard-högen
     draggedCard.style.left = x + 'px';
     draggedCard.style.top = y + 'px';
 }
 
 // Desktop drag - end
-function endDrag() {
+function endDrag(e) {
+    if (!draggedCard) return;
+    
+    const deck = draggedCard.dataset.deck;
+    const cardNum = parseInt(draggedCard.dataset.card);
+    let discardElement = null;
+    let discardPile = null;
+    
+    // Bestäm vilken discard-höga baserat på deck
+    if (deck === 'card1') {
+        discardElement = discard1;
+        discardPile = discardPile1;
+    } else if (deck === 'card2') {
+        discardElement = discard2;
+        discardPile = discardPile2;
+    }
+    
+    // Kontrollera om kortet dras över rätt discard-höga
+    if (isOverDiscardPile(e.clientX, e.clientY, discardElement)) {
+        // Lägg till kort i discard-högen
+        discardPile.push(cardNum);
+        updateDiscardDisplay(discardElement, deck);
+        draggedCard.remove();
+    } else {
+        // Begränsa inom play area om inte över discard
+        const playAreaRect = playArea.getBoundingClientRect();
+        let x = parseFloat(draggedCard.style.left);
+        let y = parseFloat(draggedCard.style.top);
+        
+        x = Math.max(0, Math.min(x, playAreaRect.width - CARD_WIDTH));
+        y = Math.max(0, Math.min(y, playAreaRect.height - CARD_HEIGHT));
+        
+        draggedCard.style.left = x + 'px';
+        draggedCard.style.top = y + 'px';
+    }
+    
+    draggedCard.style.opacity = '1';
+    draggedCard.style.zIndex = '1';
     draggedCard = null;
+    
     document.removeEventListener('mousemove', moveDrag);
     document.removeEventListener('mouseup', endDrag);
 }
@@ -225,6 +250,9 @@ function startTouchDrag(e) {
     offset.x = e.touches[0].clientX - rect.left;
     offset.y = e.touches[0].clientY - rect.top;
     
+    draggedCard.style.opacity = '0.8';
+    draggedCard.style.zIndex = '1001';
+    
     document.addEventListener('touchmove', moveTouchDrag, false);
     document.addEventListener('touchend', endTouchDrag);
     
@@ -239,10 +267,6 @@ function moveTouchDrag(e) {
     let x = e.touches[0].clientX - playAreaRect.left - offset.x;
     let y = e.touches[0].clientY - playAreaRect.top - offset.y;
     
-    // Begränsa inom play area
-    x = Math.max(0, Math.min(x, playAreaRect.width - CARD_WIDTH));
-    y = Math.max(0, Math.min(y, playAreaRect.height - CARD_HEIGHT));
-    
     draggedCard.style.left = x + 'px';
     draggedCard.style.top = y + 'px';
     
@@ -250,8 +274,47 @@ function moveTouchDrag(e) {
 }
 
 // Touch drag - end
-function endTouchDrag() {
+function endTouchDrag(e) {
+    if (!draggedCard) return;
+    
+    const deck = draggedCard.dataset.deck;
+    const cardNum = parseInt(draggedCard.dataset.card);
+    let discardElement = null;
+    let discardPile = null;
+    
+    // Bestäm vilken discard-höga baserat på deck
+    if (deck === 'card1') {
+        discardElement = discard1;
+        discardPile = discardPile1;
+    } else if (deck === 'card2') {
+        discardElement = discard2;
+        discardPile = discardPile2;
+    }
+    
+    // Kontrollera om kortet dras över rätt discard-höga
+    const touch = e.changedTouches[0];
+    if (isOverDiscardPile(touch.clientX, touch.clientY, discardElement)) {
+        // Lägg till kort i discard-högen
+        discardPile.push(cardNum);
+        updateDiscardDisplay(discardElement, deck);
+        draggedCard.remove();
+    } else {
+        // Begränsa inom play area om inte över discard
+        const playAreaRect = playArea.getBoundingClientRect();
+        let x = parseFloat(draggedCard.style.left);
+        let y = parseFloat(draggedCard.style.top);
+        
+        x = Math.max(0, Math.min(x, playAreaRect.width - CARD_WIDTH));
+        y = Math.max(0, Math.min(y, playAreaRect.height - CARD_HEIGHT));
+        
+        draggedCard.style.left = x + 'px';
+        draggedCard.style.top = y + 'px';
+    }
+    
+    draggedCard.style.opacity = '1';
+    draggedCard.style.zIndex = '1';
     draggedCard = null;
+    
     document.removeEventListener('touchmove', moveTouchDrag);
     document.removeEventListener('touchend', endTouchDrag);
 }
