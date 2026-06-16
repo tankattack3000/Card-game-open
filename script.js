@@ -42,14 +42,17 @@ function drawCard1() {
     if (shuffledDeck1.length === 0) {
         // Frågör om man vill blanda om från discardhögen
         if (confirm('Leken är tom! Vill du blanda om discardkorten och dra igen?')) {
-            // Blanda om discardhögen och lägg tillbaka i main deck
-            if (discardPile1.length > 0) {
-                cards1 = [...discardPile1];
+            // Kombinera båda discard-högar
+            let allDiscardCards = [...discardPile1, ...discardPile2];
+            if (allDiscardCards.length > 0) {
+                cards1 = allDiscardCards;
                 discardPile1 = [];
+                discardPile2 = [];
                 clearDiscardDisplay(discard1);
+                clearDiscardDisplay(discard2);
                 shuffleDeck1Func();
             } else {
-                alert('Det finns inga kort i discardhögen!');
+                alert('Det finns inga kort i discardhögarna!');
                 return;
             }
         } else {
@@ -73,14 +76,17 @@ function drawCard2() {
     if (shuffledDeck2.length === 0) {
         // Frågör om man vill blanda om från discardhögen
         if (confirm('Leken är tom! Vill du blanda om discardkorten och dra igen?')) {
-            // Blanda om discardhögen och lägg tillbaka i main deck
-            if (discardPile2.length > 0) {
-                cards2 = [...discardPile2];
+            // Kombinera båda discard-högar
+            let allDiscardCards = [...discardPile1, ...discardPile2];
+            if (allDiscardCards.length > 0) {
+                cards2 = allDiscardCards;
+                discardPile1 = [];
                 discardPile2 = [];
+                clearDiscardDisplay(discard1);
                 clearDiscardDisplay(discard2);
                 shuffleDeck2Func();
             } else {
-                alert('Det finns inga kort i discardhögen!');
+                alert('Det finns inga kort i discardhögarna!');
                 return;
             }
         } else {
@@ -126,10 +132,22 @@ function createCardElement(cardNumber, deck) {
 function updateDiscardDisplay(discardElement, deck) {
     clearDiscardDisplay(discardElement);
     
-    const discardPile = (deck === 'card1') ? discardPile1 : discardPile2;
+    let topCard = null;
+    if (discardPile1.length > 0 || discardPile2.length > 0) {
+        // Visa översta kort från vilken höga som helst
+        if (discardPile1.length > 0 && discardPile2.length > 0) {
+            topCard = discardPile1[discardPile1.length - 1];
+            deck = 'card1';
+        } else if (discardPile1.length > 0) {
+            topCard = discardPile1[discardPile1.length - 1];
+            deck = 'card1';
+        } else {
+            topCard = discardPile2[discardPile2.length - 1];
+            deck = 'card2';
+        }
+    }
     
-    if (discardPile.length > 0) {
-        const topCard = discardPile[discardPile.length - 1];
+    if (topCard) {
         const card = document.createElement('div');
         card.className = 'card';
         card.style.position = 'static';
@@ -149,6 +167,105 @@ function clearDiscardDisplay(discardElement) {
     if (card) {
         card.remove();
     }
+}
+
+// Visa modal med alla kort i discard-högarna
+function showDiscardModal() {
+    const allCards = [...discardPile1, ...discardPile2];
+    
+    if (allCards.length === 0) {
+        alert('Discardhögarna är tomma!');
+        return;
+    }
+    
+    // Skapa modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    `;
+    
+    const title = document.createElement('h2');
+    title.textContent = 'Kort i Discardhögarna';
+    title.style.marginBottom = '20px';
+    content.appendChild(title);
+    
+    const list = document.createElement('div');
+    list.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 10px;
+    `;
+    
+    // Lägg till varje kort som en liten thumbnail
+    allCards.forEach((cardNum, index) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.style.cssText = `
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background: white;
+        `;
+        
+        const img = document.createElement('img');
+        img.style.cssText = `
+            width: 100%;
+            height: auto;
+            display: block;
+        `;
+        
+        // Försök att avgöra vilken deck kortet kommer från (enkel heuristic)
+        let deck = (index < discardPile1.length) ? 'card1' : 'card2';
+        
+        img.src = `${deck}/card${cardNum}.png`;
+        img.alt = `Card ${cardNum}`;
+        
+        cardDiv.appendChild(img);
+        list.appendChild(cardDiv);
+    });
+    
+    content.appendChild(list);
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Stäng';
+    closeBtn.style.cssText = `
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+    `;
+    closeBtn.addEventListener('click', () => modal.remove());
+    content.appendChild(closeBtn);
+    
+    modal.appendChild(content);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+    
+    document.body.appendChild(modal);
 }
 
 // Kontrollera om punkt är inom discard-högen
@@ -199,23 +316,23 @@ function endDrag(e) {
     
     const deck = draggedCard.dataset.deck;
     const cardNum = parseInt(draggedCard.dataset.card);
-    let discardElement = null;
-    let discardPile = null;
     
-    // Bestäm vilken discard-höga baserat på deck
-    if (deck === 'card1') {
-        discardElement = discard1;
-        discardPile = discardPile1;
-    } else if (deck === 'card2') {
-        discardElement = discard2;
-        discardPile = discardPile2;
+    // Kontrollera vilken discard-höga kort dras över
+    let droppedInDiscard = false;
+    
+    if (isOverDiscardPile(e.clientX, e.clientY, discard1)) {
+        discardPile1.push(cardNum);
+        updateDiscardDisplay(discard1);
+        updateDiscardDisplay(discard2);
+        droppedInDiscard = true;
+    } else if (isOverDiscardPile(e.clientX, e.clientY, discard2)) {
+        discardPile2.push(cardNum);
+        updateDiscardDisplay(discard1);
+        updateDiscardDisplay(discard2);
+        droppedInDiscard = true;
     }
     
-    // Kontrollera om kortet dras över rätt discard-höga
-    if (isOverDiscardPile(e.clientX, e.clientY, discardElement)) {
-        // Lägg till kort i discard-högen
-        discardPile.push(cardNum);
-        updateDiscardDisplay(discardElement, deck);
+    if (droppedInDiscard) {
         draggedCard.remove();
     } else {
         // Begränsa inom play area om inte över discard
@@ -279,24 +396,24 @@ function endTouchDrag(e) {
     
     const deck = draggedCard.dataset.deck;
     const cardNum = parseInt(draggedCard.dataset.card);
-    let discardElement = null;
-    let discardPile = null;
+    const touch = e.changedTouches[0];
     
-    // Bestäm vilken discard-höga baserat på deck
-    if (deck === 'card1') {
-        discardElement = discard1;
-        discardPile = discardPile1;
-    } else if (deck === 'card2') {
-        discardElement = discard2;
-        discardPile = discardPile2;
+    // Kontrollera vilken discard-höga kort dras över
+    let droppedInDiscard = false;
+    
+    if (isOverDiscardPile(touch.clientX, touch.clientY, discard1)) {
+        discardPile1.push(cardNum);
+        updateDiscardDisplay(discard1);
+        updateDiscardDisplay(discard2);
+        droppedInDiscard = true;
+    } else if (isOverDiscardPile(touch.clientX, touch.clientY, discard2)) {
+        discardPile2.push(cardNum);
+        updateDiscardDisplay(discard1);
+        updateDiscardDisplay(discard2);
+        droppedInDiscard = true;
     }
     
-    // Kontrollera om kortet dras över rätt discard-höga
-    const touch = e.changedTouches[0];
-    if (isOverDiscardPile(touch.clientX, touch.clientY, discardElement)) {
-        // Lägg till kort i discard-högen
-        discardPile.push(cardNum);
-        updateDiscardDisplay(discardElement, deck);
+    if (droppedInDiscard) {
         draggedCard.remove();
     } else {
         // Begränsa inom play area om inte över discard
@@ -322,6 +439,8 @@ function endTouchDrag(e) {
 // Event listeners
 deck1.addEventListener('click', drawCard1);
 deck2.addEventListener('click', drawCard2);
+discard1.addEventListener('click', showDiscardModal);
+discard2.addEventListener('click', showDiscardModal);
 
 // Starta spelet
 initCards();
