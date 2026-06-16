@@ -35,6 +35,15 @@ h2 {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+h3 {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 15px;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 .game-area {
     display: flex;
     gap: 20px;
@@ -69,6 +78,19 @@ h2 {
 
 .deck:active {
     transform: scale(0.98);
+}
+
+.discard-deck {
+    width: 120px;
+    height: 160px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    position: relative;
 }
 
 .card-placeholder {
@@ -118,6 +140,13 @@ h2 {
     object-fit: cover;
 }
 
+.discard-deck .card {
+    position: static;
+    width: 100%;
+    height: 100%;
+    cursor: default;
+}
+
 /* Responsiv design för mobil */
 @media (max-width: 1024px) {
     .game-area {
@@ -151,6 +180,11 @@ h2 {
     }
 
     .deck {
+        width: 100px;
+        height: 140px;
+    }
+
+    .discard-deck {
         width: 100px;
         height: 140px;
     }
