@@ -8,6 +8,8 @@ let shuffledDeck1 = [];
 let shuffledDeck2 = [];
 let draggedCard = null;
 let offset = { x: 0, y: 0 };
+let drawnCards1 = [];
+let drawnCards2 = [];
 
 const deck1 = document.getElementById('deck1');
 const deck2 = document.getElementById('deck2');
@@ -36,7 +38,23 @@ function shuffleDeck2Func() {
 // Dra ett kort från lek 1
 function drawCard1() {
     if (shuffledDeck1.length === 0) {
-        shuffleDeck1Func();
+        // Frågör om man vill blanda om
+        if (confirm('Leken är tom! Vill du blanda om och dra kort igen?')) {
+            // Samla in alla kort från spelplanen som är från lek 1
+            const cards = document.querySelectorAll('.card[data-deck="card1"]');
+            cards.forEach(card => {
+                const cardNum = parseInt(card.dataset.card);
+                drawnCards1.push(cardNum);
+                card.remove();
+            });
+            
+            // Lägg tillbaka kort i leken
+            cards1 = [...drawnCards1];
+            drawnCards1 = [];
+            shuffleDeck1Func();
+        } else {
+            return;
+        }
     }
     
     const cardNumber = shuffledDeck1.pop();
@@ -53,7 +71,23 @@ function drawCard1() {
 // Dra ett kort från lek 2
 function drawCard2() {
     if (shuffledDeck2.length === 0) {
-        shuffleDeck2Func();
+        // Frågör om man vill blanda om
+        if (confirm('Leken är tom! Vill du blanda om och dra kort igen?')) {
+            // Samla in alla kort från spelplanen som är från lek 2
+            const cards = document.querySelectorAll('.card[data-deck="card2"]');
+            cards.forEach(card => {
+                const cardNum = parseInt(card.dataset.card);
+                drawnCards2.push(cardNum);
+                card.remove();
+            });
+            
+            // Lägg tillbaka kort i leken
+            cards2 = [...drawnCards2];
+            drawnCards2 = [];
+            shuffleDeck2Func();
+        } else {
+            return;
+        }
     }
     
     const cardNumber = shuffledDeck2.pop();
@@ -73,6 +107,7 @@ function createCardElement(cardNumber, deck) {
     card.className = 'card';
     card.dataset.card = cardNumber;
     card.dataset.deck = deck;
+    card.dataset.drawn = 'true'; // Markera att kortet är redan dragit
     
     const img = document.createElement('img');
     img.src = `${deck}/card${cardNumber}.png`;
@@ -92,6 +127,9 @@ function createCardElement(cardNumber, deck) {
 // Desktop drag - start
 function startDrag(e) {
     if (e.button !== 0) return; // Only left mouse button
+    
+    // Bara tillåt dragging av kort från spelplanen, inte från högen
+    if (!this.dataset.drawn) return;
     
     draggedCard = this;
     const rect = this.getBoundingClientRect();
@@ -131,6 +169,9 @@ function endDrag() {
 
 // Touch drag - start
 function startTouchDrag(e) {
+    // Bara tillåt dragging av kort från spelplanen, inte från högen
+    if (!this.dataset.drawn) return;
+    
     draggedCard = this;
     const rect = this.getBoundingClientRect();
     const playAreaRect = playArea.getBoundingClientRect();
